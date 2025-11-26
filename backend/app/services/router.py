@@ -79,14 +79,14 @@ class ModelRouter:
     
     # Task-specific model preferences
     TASK_MODEL_PREFERENCES = {
-        TaskType.SENTIMENT: ["local/sentiment", "gpt-4o-mini", "claude-3-5-haiku-20241022"],
-        TaskType.SUMMARIZE: ["gpt-4o-mini", "claude-3-5-haiku-20241022", "gpt-4o"],
-        TaskType.REWRITE: ["gpt-4o", "claude-3-5-sonnet-20241022", "gpt-4o-mini"],
-        TaskType.TOOLS: ["gpt-4o", "claude-3-5-sonnet-20241022"],
-        TaskType.CODE: ["claude-3-5-sonnet-20241022", "gpt-4o", "gpt-4o-mini"],
-        TaskType.ANALYSIS: ["claude-3-5-sonnet-20241022", "gpt-4o", "claude-3-opus-20240229"],
-        TaskType.CHAT: ["gpt-4o-mini", "claude-3-5-haiku-20241022", "gpt-4o"],
-        TaskType.CUSTOM: ["gpt-4o", "claude-3-5-sonnet-20241022"],
+        TaskType.SENTIMENT: ["local/sentiment", "gemini/gemini-1.5-flash", "gpt-4o-mini", "claude-3-5-haiku-20241022"],
+        TaskType.SUMMARIZE: ["gemini/gemini-1.5-flash", "gpt-4o-mini", "claude-3-5-haiku-20241022", "gpt-4o"],
+        TaskType.REWRITE: ["gpt-4o", "claude-3-5-sonnet-20241022", "gemini/gemini-1.5-pro", "gpt-4o-mini"],
+        TaskType.TOOLS: ["gpt-4o", "claude-3-5-sonnet-20241022", "gemini/gemini-1.5-pro"],
+        TaskType.CODE: ["claude-3-5-sonnet-20241022", "gpt-4o", "gemini/gemini-1.5-pro", "gpt-4o-mini"],
+        TaskType.ANALYSIS: ["claude-3-5-sonnet-20241022", "gpt-4o", "gemini/gemini-1.5-pro", "claude-3-opus-20240229"],
+        TaskType.CHAT: ["gemini/gemini-2.0-flash-exp", "gpt-4o-mini", "claude-3-5-haiku-20241022", "gpt-4o"],
+        TaskType.CUSTOM: ["gpt-4o", "claude-3-5-sonnet-20241022", "gemini/gemini-1.5-pro"],
     }
     
     def __init__(self):

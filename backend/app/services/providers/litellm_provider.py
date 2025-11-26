@@ -41,6 +41,14 @@ class LiteLLMProvider(BaseProvider):
         "claude-3-5-sonnet-20241022": "claude-3-5-sonnet-20241022",
         "claude-3-5-haiku-20241022": "claude-3-5-haiku-20241022",
         
+        # Google Gemini models
+        "gemini/gemini-1.5-pro": "gemini/gemini-1.5-pro",
+        "gemini/gemini-1.5-flash": "gemini/gemini-1.5-flash",
+        "gemini/gemini-2.0-flash-exp": "gemini/gemini-2.0-flash-exp",
+        "gemini-1.5-pro": "gemini/gemini-1.5-pro",
+        "gemini-1.5-flash": "gemini/gemini-1.5-flash",
+        "gemini-2.0-flash-exp": "gemini/gemini-2.0-flash-exp",
+        
         # Azure OpenAI (prefix with azure/)
         "azure/gpt-4o": "azure/gpt-4o",
         "azure/gpt-4o-mini": "azure/gpt-4o-mini",
@@ -49,6 +57,8 @@ class LiteLLMProvider(BaseProvider):
         "bedrock/claude-3-sonnet": "bedrock/anthropic.claude-3-sonnet-20240229-v1:0",
         "bedrock/claude-3-haiku": "bedrock/anthropic.claude-3-haiku-20240307-v1:0",
         "bedrock/llama3-70b": "bedrock/meta.llama3-70b-instruct-v1:0",
+        "bedrock/anthropic.claude-3-sonnet": "bedrock/anthropic.claude-3-sonnet-20240229-v1:0",
+        "bedrock/meta.llama3-70b-instruct": "bedrock/meta.llama3-70b-instruct-v1:0",
     }
     
     def __init__(self):
@@ -71,6 +81,11 @@ class LiteLLMProvider(BaseProvider):
         if self.settings.anthropic_api_key:
             litellm.anthropic_key = self.settings.anthropic_api_key
         
+        # Gemini configuration
+        if self.settings.gemini_api_key:
+            import os
+            os.environ["GEMINI_API_KEY"] = self.settings.gemini_api_key
+        
         # Azure configuration
         if self.settings.azure_openai_api_key:
             litellm.azure_key = self.settings.azure_openai_api_key
@@ -90,6 +105,8 @@ class LiteLLMProvider(BaseProvider):
             return "azure"
         elif model_lower.startswith("bedrock/"):
             return "bedrock"
+        elif model_lower.startswith("gemini/") or "gemini" in model_lower:
+            return "gemini"
         elif "claude" in model_lower:
             return "anthropic"
         elif "gpt" in model_lower or "o1" in model_lower:
@@ -244,6 +261,13 @@ class LiteLLMProvider(BaseProvider):
                 "claude-3-5-sonnet-20241022",
                 "claude-3-5-haiku-20241022",
                 "claude-3-opus-20240229",
+            ])
+        
+        if self.settings.gemini_api_key:
+            available.extend([
+                "gemini/gemini-1.5-pro",
+                "gemini/gemini-1.5-flash",
+                "gemini/gemini-2.0-flash-exp",
             ])
         
         if self.settings.azure_openai_api_key:

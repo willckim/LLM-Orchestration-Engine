@@ -25,9 +25,10 @@ class Settings(BaseSettings):
     # LLM Providers
     openai_api_key: Optional[str] = Field(default=None, alias="OPENAI_API_KEY")
     anthropic_api_key: Optional[str] = Field(default=None, alias="ANTHROPIC_API_KEY")
-    azure_openai_api_key: Optional[str] = Field(default=None, alias="AZURE_OPENAI_API_KEY")
-    azure_openai_endpoint: Optional[str] = Field(default=None, alias="AZURE_OPENAI_ENDPOINT")
-    azure_openai_api_version: str = Field(default="2024-02-15-preview", alias="AZURE_OPENAI_API_VERSION")
+    gemini_api_key: Optional[str] = Field(default=None, alias="GEMINI_API_KEY")
+    azure_openai_api_key: Optional[str] = Field(default=None, alias="AZURE_API_KEY")
+    azure_openai_endpoint: Optional[str] = Field(default=None, alias="AZURE_API_BASE")
+    azure_openai_api_version: str = Field(default="2024-02-15-preview", alias="AZURE_API_VERSION")
     
     # AWS Configuration
     aws_region: str = Field(default="us-east-1", alias="AWS_REGION")
@@ -74,6 +75,8 @@ class Settings(BaseSettings):
             providers.append("openai")
         if self.anthropic_api_key:
             providers.append("anthropic")
+        if self.gemini_api_key:
+            providers.append("gemini")
         if self.azure_openai_api_key and self.azure_openai_endpoint:
             providers.append("azure")
         if self.enable_local_models:
@@ -107,6 +110,11 @@ MODEL_PRICING = {
     "claude-3-5-haiku-20241022": {"input": 0.0008, "output": 0.004},
     "claude-3-opus-20240229": {"input": 0.015, "output": 0.075},
     
+    # Google Gemini
+    "gemini/gemini-1.5-pro": {"input": 0.00125, "output": 0.005},
+    "gemini/gemini-1.5-flash": {"input": 0.000075, "output": 0.0003},
+    "gemini/gemini-2.0-flash-exp": {"input": 0.0, "output": 0.0},  # Free during preview
+    
     # Azure OpenAI (same as OpenAI but may vary by region)
     "azure/gpt-4o": {"input": 0.0025, "output": 0.01},
     "azure/gpt-4o-mini": {"input": 0.00015, "output": 0.0006},
@@ -126,6 +134,7 @@ MODEL_PRICING = {
 
 # Model capabilities and characteristics
 MODEL_CAPABILITIES = {
+    # OpenAI
     "gpt-4o": {
         "tasks": ["summarize", "sentiment", "rewrite", "tools", "chat", "code", "analysis"],
         "max_tokens": 128000,
@@ -140,6 +149,7 @@ MODEL_CAPABILITIES = {
         "quality_score": 0.85,
         "provider": "openai",
     },
+    # Anthropic
     "claude-3-5-sonnet-20241022": {
         "tasks": ["summarize", "sentiment", "rewrite", "tools", "chat", "code", "analysis"],
         "max_tokens": 200000,
@@ -154,6 +164,59 @@ MODEL_CAPABILITIES = {
         "quality_score": 0.80,
         "provider": "anthropic",
     },
+    # Google Gemini
+    "gemini/gemini-1.5-pro": {
+        "tasks": ["summarize", "sentiment", "rewrite", "tools", "chat", "code", "analysis"],
+        "max_tokens": 2000000,
+        "avg_latency_ms": 1500,
+        "quality_score": 0.92,
+        "provider": "gemini",
+    },
+    "gemini/gemini-1.5-flash": {
+        "tasks": ["summarize", "sentiment", "rewrite", "chat", "code"],
+        "max_tokens": 1000000,
+        "avg_latency_ms": 400,
+        "quality_score": 0.82,
+        "provider": "gemini",
+    },
+    "gemini/gemini-2.0-flash-exp": {
+        "tasks": ["summarize", "sentiment", "rewrite", "tools", "chat", "code", "analysis"],
+        "max_tokens": 1000000,
+        "avg_latency_ms": 350,
+        "quality_score": 0.88,
+        "provider": "gemini",
+    },
+    # Azure
+    "azure/gpt-4o": {
+        "tasks": ["summarize", "sentiment", "rewrite", "tools", "chat", "code", "analysis"],
+        "max_tokens": 128000,
+        "avg_latency_ms": 1600,
+        "quality_score": 0.95,
+        "provider": "azure",
+    },
+    "azure/gpt-4o-mini": {
+        "tasks": ["summarize", "sentiment", "rewrite", "chat", "code"],
+        "max_tokens": 128000,
+        "avg_latency_ms": 900,
+        "quality_score": 0.85,
+        "provider": "azure",
+    },
+    # AWS Bedrock
+    "bedrock/anthropic.claude-3-sonnet": {
+        "tasks": ["summarize", "sentiment", "rewrite", "tools", "chat", "code", "analysis"],
+        "max_tokens": 200000,
+        "avg_latency_ms": 1400,
+        "quality_score": 0.93,
+        "provider": "bedrock",
+    },
+    "bedrock/meta.llama3-70b-instruct": {
+        "tasks": ["summarize", "sentiment", "rewrite", "chat", "code"],
+        "max_tokens": 8000,
+        "avg_latency_ms": 1000,
+        "quality_score": 0.85,
+        "provider": "bedrock",
+    },
+    # Local ONNX
     "local/sentiment": {
         "tasks": ["sentiment"],
         "max_tokens": 512,
@@ -168,6 +231,7 @@ MODEL_CAPABILITIES = {
         "quality_score": 0.70,
         "provider": "local",
     },
+    # Mock
     "mock/default": {
         "tasks": ["summarize", "sentiment", "rewrite", "tools", "chat", "code", "analysis"],
         "max_tokens": 4096,
