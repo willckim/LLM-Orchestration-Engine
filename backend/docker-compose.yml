@@ -1,0 +1,65 @@
+# LLM Orchestration Engine - Docker Compose
+# Local development environment
+
+version: '3.8'
+
+services:
+  # Main API Service
+  api:
+    build:
+      context: .
+      target: production
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=true
+      - USE_LOCAL_STORAGE=true
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY:-}
+      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT:-}
+      - API_KEYS=dev-key-123,test-key-456
+    volumes:
+      - ./app:/app/app:ro  # Mount for hot reload in dev
+      - ./data:/app/data   # Persist local storage
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # DynamoDB Local (for AWS-like development)
+  dynamodb-local:
+    image: amazon/dynamodb-local:latest
+    ports:
+      - "8001:8000"
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath /data"
+    volumes:
+      - dynamodb-data:/data
+    profiles:
+      - aws  # Only start when using AWS profile
+
+  # LocalStack (full AWS simulation)
+  localstack:
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"  # LocalStack gateway
+    environment:
+      - SERVICES=dynamodb,s3,sqs,stepfunctions,lambda
+      - DEBUG=1
+      - DATA_DIR=/var/lib/localstack/data
+    volumes:
+      - localstack-data:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+    profiles:
+      - aws  # Only start when using AWS profile
+
+volumes:
+  dynamodb-data:
+  localstack-data:
+
+networks:
+  default:
+    name: llm-orchestration-network
