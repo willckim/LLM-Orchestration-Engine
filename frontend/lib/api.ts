@@ -199,6 +199,13 @@ export async function estimateCost(request: GenerateRequest): Promise<{
   });
 }
 
+// Clear all metrics and logs
+export async function clearMetrics(): Promise<{ success: boolean; message: string }> {
+  return fetchAPI('/api/v1/metrics/clear', {
+    method: 'DELETE',
+  });
+}
+
 // Utility: Format cost
 export function formatCost(cost: number): string {
   if (cost < 0.0001) {

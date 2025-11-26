@@ -12,10 +12,11 @@ import {
   getMetricsSummary, 
   getRequestLogs, 
   getRealtimeStats,
+  clearMetrics,
   MetricsSummary, 
   RequestLog 
 } from '@/lib/api';
-import { RefreshCw, ExternalLink } from 'lucide-react';
+import { RefreshCw, ExternalLink, Trash2 } from 'lucide-react';
 
 export default function Dashboard() {
   const [metrics, setMetrics] = useState<MetricsSummary | null>(null);
@@ -59,6 +60,20 @@ export default function Dashboard() {
     fetchData();
   };
 
+  const handleClear = async () => {
+    if (!confirm('Clear all metrics and request history?')) return;
+    
+    try {
+      await clearMetrics();
+      setMetrics(null);
+      setLogs([]);
+      setProviderHealth({});
+      fetchData();
+    } catch (err) {
+      console.error('Failed to clear metrics:', err);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
       <Header />
@@ -78,6 +93,13 @@ export default function Dashboard() {
                 Updated {lastUpdated.toLocaleTimeString()}
               </span>
             )}
+            <button
+              onClick={handleClear}
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-red-200 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-all shadow-sm"
+            >
+              <Trash2 className="w-4 h-4" />
+              Clear
+            </button>
             <button
               onClick={handleRefresh}
               disabled={loading}
