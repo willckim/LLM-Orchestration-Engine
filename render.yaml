@@ -1,0 +1,61 @@
+# Render Blueprint - Deploy both services with one click
+# https://render.com/docs/blueprint-spec
+
+services:
+  # Backend API (FastAPI)
+  - type: web
+    name: llm-orchestration-api
+    runtime: python
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: "false"
+      - key: API_KEYS
+        sync: false  # Set manually in dashboard
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: AZURE_API_KEY
+        sync: false
+      - key: AZURE_API_BASE
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_REGION
+        value: us-east-1
+      - key: ENABLE_LOCAL_MODELS
+        value: "false"
+      - key: USE_LOCAL_STORAGE
+        value: "true"
+      - key: ENABLE_METRICS
+        value: "true"
+    healthCheckPath: /health
+
+  # Frontend Dashboard (Next.js)
+  - type: web
+    name: llm-orchestration-dashboard
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          name: llm-orchestration-api
+          type: web
+          property: host
+      - key: NEXT_PUBLIC_API_KEY
+        sync: false  # Set manually - must match API_KEYS in backend

@@ -23,6 +23,7 @@ aiohttp>=3.9.0
 # Utilities
 python-dotenv==1.0.1
 python-multipart==0.0.20
+gunicorn==23.0.0
 
 # Development
 pytest==8.3.4
