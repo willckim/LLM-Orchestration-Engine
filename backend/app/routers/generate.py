@@ -67,6 +67,20 @@ async def generate(
         )
         
         inference_time = time.perf_counter()
+
+        # --- BUG FIX START ---
+        # Update routing decision if the actual model used differs from the initial selection
+        # This handles cases where fallbacks occurred inside execute_request
+        fallback_occurred = provider_response.model_used != selected_model
+        if fallback_occurred:
+            # We assume RoutingDecision has a 'model' field. 
+            # If it's a Pydantic model, we use model_copy or direct assignment depending on config
+            if hasattr(routing_decision, "model"):
+                # specific to Pydantic v1/v2 compatibility, simplified assignment here
+                routing_decision.model = provider_response.model_used
+                if hasattr(routing_decision, "reasoning"):
+                    routing_decision.reasoning += f" (Fallback triggered. Used: {provider_response.model_used})"
+        # --- BUG FIX END ---
         
         cost_breakdown = cost_calculator.calculate_cost(
             model=provider_response.model_used,
@@ -106,7 +120,7 @@ async def generate(
             performance=performance,
             cached=False,
             retries=0,
-            fallback_used=provider_response.model_used != selected_model,
+            fallback_used=fallback_occurred,
         )
         
         # Record metrics
