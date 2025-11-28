@@ -90,11 +90,6 @@ class Settings(BaseSettings):
         # Always include mock for testing
         providers.append("mock")
         return providers
-    
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        extra = "ignore"
 
 
 @lru_cache()
