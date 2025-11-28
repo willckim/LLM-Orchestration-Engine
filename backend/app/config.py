@@ -3,7 +3,7 @@ LLM Orchestration Engine - Configuration
 Enterprise-grade settings with environment-based configuration
 """
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
 from typing import Optional
 from functools import lru_cache
@@ -12,39 +12,45 @@ from functools import lru_cache
 class Settings(BaseSettings):
     """Application settings with environment variable support"""
     
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
+    
     # Application
     app_name: str = "LLM Orchestration Engine"
     app_version: str = "1.0.0"
-    environment: str = Field(default="development", alias="ENVIRONMENT")
-    debug: bool = Field(default=True, alias="DEBUG")
+    environment: str = Field(default="development", validation_alias="ENVIRONMENT")
+    debug: bool = Field(default=True, validation_alias="DEBUG")
     
     # API Security
     api_key_header: str = "X-API-Key"
-    api_keys: str = Field(default="dev-key-123,test-key-456", alias="API_KEYS")
+    api_keys: str = Field(default="dev-key-123,test-key-456", validation_alias="API_KEYS")
     
     # LLM Providers
-    openai_api_key: Optional[str] = Field(default=None, alias="OPENAI_API_KEY")
-    anthropic_api_key: Optional[str] = Field(default=None, alias="ANTHROPIC_API_KEY")
-    gemini_api_key: Optional[str] = Field(default=None, alias="GEMINI_API_KEY")
-    azure_openai_api_key: Optional[str] = Field(default=None, alias="AZURE_API_KEY")
-    azure_openai_endpoint: Optional[str] = Field(default=None, alias="AZURE_API_BASE")
-    azure_openai_api_version: str = Field(default="2024-02-15-preview", alias="AZURE_API_VERSION")
+    openai_api_key: Optional[str] = Field(default=None, validation_alias="OPENAI_API_KEY")
+    anthropic_api_key: Optional[str] = Field(default=None, validation_alias="ANTHROPIC_API_KEY")
+    gemini_api_key: Optional[str] = Field(default=None, validation_alias="GEMINI_API_KEY")
+    azure_openai_api_key: Optional[str] = Field(default=None, validation_alias="AZURE_API_KEY")
+    azure_openai_endpoint: Optional[str] = Field(default=None, validation_alias="AZURE_API_BASE")
+    azure_openai_api_version: str = Field(default="2024-02-15-preview", validation_alias="AZURE_API_VERSION")
     
     # AWS Configuration
-    aws_region: str = Field(default="us-east-1", alias="AWS_REGION")
-    aws_access_key_id: Optional[str] = Field(default=None, alias="AWS_ACCESS_KEY_ID")
-    aws_secret_access_key: Optional[str] = Field(default=None, alias="AWS_SECRET_ACCESS_KEY")
-    dynamodb_table_name: str = Field(default="llm-orchestration-logs", alias="DYNAMODB_TABLE_NAME")
-    s3_bucket_name: str = Field(default="llm-orchestration-outputs", alias="S3_BUCKET_NAME")
+    aws_region: str = Field(default="us-east-1", validation_alias="AWS_REGION")
+    aws_access_key_id: Optional[str] = Field(default=None, validation_alias="AWS_ACCESS_KEY_ID")
+    aws_secret_access_key: Optional[str] = Field(default=None, validation_alias="AWS_SECRET_ACCESS_KEY")
+    dynamodb_table_name: str = Field(default="llm-orchestration-logs", validation_alias="DYNAMODB_TABLE_NAME")
+    s3_bucket_name: str = Field(default="llm-orchestration-outputs", validation_alias="S3_BUCKET_NAME")
     
     # Storage Mode
-    use_local_storage: bool = Field(default=True, alias="USE_LOCAL_STORAGE")
-    local_storage_path: str = Field(default="./data/logs.json", alias="LOCAL_STORAGE_PATH")
+    use_local_storage: bool = Field(default=True, validation_alias="USE_LOCAL_STORAGE")
+    local_storage_path: str = Field(default="./data/logs.json", validation_alias="LOCAL_STORAGE_PATH")
     
     # Model Routing Defaults
-    default_preference: str = Field(default="balanced", alias="DEFAULT_PREFERENCE")
-    max_retries: int = Field(default=3, alias="MAX_RETRIES")
-    timeout_seconds: int = Field(default=30, alias="TIMEOUT_SECONDS")
+    default_preference: str = Field(default="balanced", validation_alias="DEFAULT_PREFERENCE")
+    max_retries: int = Field(default=3, validation_alias="MAX_RETRIES")
+    timeout_seconds: int = Field(default=30, validation_alias="TIMEOUT_SECONDS")
     
     # Cost Thresholds (USD per 1K tokens)
     cost_threshold_cheap: float = 0.001  # Below this = "cheap"
@@ -55,12 +61,12 @@ class Settings(BaseSettings):
     latency_threshold_moderate_ms: int = 2000
     
     # Local ONNX Model Settings
-    enable_local_models: bool = Field(default=True, alias="ENABLE_LOCAL_MODELS")
-    local_model_path: str = Field(default="./models", alias="LOCAL_MODEL_PATH")
+    enable_local_models: bool = Field(default=True, validation_alias="ENABLE_LOCAL_MODELS")
+    local_model_path: str = Field(default="./models", validation_alias="LOCAL_MODEL_PATH")
     
     # Metrics & Observability
-    enable_metrics: bool = Field(default=True, alias="ENABLE_METRICS")
-    metrics_retention_days: int = Field(default=30, alias="METRICS_RETENTION_DAYS")
+    enable_metrics: bool = Field(default=True, validation_alias="ENABLE_METRICS")
+    metrics_retention_days: int = Field(default=30, validation_alias="METRICS_RETENTION_DAYS")
     
     @property
     def valid_api_keys(self) -> set:
