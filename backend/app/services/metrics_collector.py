@@ -141,6 +141,12 @@ class MetricsCollector:
         # Cleanup old metrics
         self._cleanup_old_metrics()
     
+    def clear(self):
+        """Clear all metrics"""
+        self._metrics = []
+        self._request_count = 0
+        self._start_time = datetime.utcnow()
+    
     def _cleanup_old_metrics(self):
         """Remove metrics older than retention period"""
         cutoff = datetime.utcnow() - timedelta(hours=self.retention_hours)

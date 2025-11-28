@@ -63,7 +63,10 @@ export default function TryItDemo({ onRequestComplete }: TryItDemoProps) {
         text: text.trim(),
       });
       setResponse(result);
-      onRequestComplete?.();
+      // Add delay to ensure backend has written data before refreshing dashboard
+      if (onRequestComplete) {
+        setTimeout(onRequestComplete, 500);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate response');
     } finally {

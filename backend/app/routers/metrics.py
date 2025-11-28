@@ -242,16 +242,22 @@ async def clear_metrics(
     api_key: str = Depends(verify_api_key),
 ):
     """Clear all stored metrics and logs"""
+    from app.services import get_router
+    
     # Clear metrics collector
     metrics = get_metrics_collector()
-    metrics._metrics = []
-    metrics._request_count = 0
+    metrics.clear()
     
     # Clear cost calculator
     cost_calc = get_cost_calculator()
     cost_calc._total_cost_usd = 0.0
     cost_calc._cost_by_model = {}
     cost_calc._cost_by_provider = {}
+    
+    # Clear router's internal metrics
+    router_service = get_router()
+    router_service._model_metrics = {}
+    router_service._provider_health = {}
     
     # Clear local storage
     storage = get_local_storage()
