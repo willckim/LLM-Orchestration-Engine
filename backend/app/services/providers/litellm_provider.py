@@ -167,24 +167,11 @@ class LiteLLMProvider(BaseProvider):
             # Extract content
             content = response["choices"][0]["message"]["content"]
             
-            # Get ACTUAL model used from response
-            # LiteLLM returns a ModelResponse object - access model attribute directly
-            if hasattr(response, 'model') and response.model:
-                actual_model = response.model
-            elif isinstance(response, dict) and response.get("model"):
-                actual_model = response.get("model")
-            else:
-                # Fallback to what we requested
-                actual_model = resolved_model
-            
-            # For Claude models, LiteLLM might return just the version
-            # Ensure we keep our original model name if it matches
-            if "claude" in resolved_model.lower() and "claude" in str(actual_model).lower():
-                actual_model = resolved_model
-            elif "gemini" in resolved_model.lower() and ("gemini" in str(actual_model).lower() or "models/" in str(actual_model)):
-                actual_model = resolved_model
-            
-            actual_provider = self._detect_provider(actual_model)
+            # Use the model we requested - LiteLLM returns different formats per provider
+            # (OpenAI returns dated versions like gpt-4o-2024-08-06, Anthropic/Gemini return different formats)
+            # We trust that LiteLLM called the correct API based on our resolved_model
+            actual_model = resolved_model
+            actual_provider = provider
             
             self.record_request(success=True, latency_ms=latency_ms)
             
