@@ -73,13 +73,17 @@ async def generate(
         # This handles cases where fallbacks occurred inside execute_request
         fallback_occurred = provider_response.model_used != selected_model
         if fallback_occurred:
-            # We assume RoutingDecision has a 'model' field. 
-            # If it's a Pydantic model, we use model_copy or direct assignment depending on config
-            if hasattr(routing_decision, "model"):
-                # specific to Pydantic v1/v2 compatibility, simplified assignment here
+            # Fix: Use 'selected_model' instead of 'model' to match RoutingDecision definition
+            if hasattr(routing_decision, "selected_model"):
+                routing_decision.selected_model = provider_response.model_used
+            elif hasattr(routing_decision, "model"):
                 routing_decision.model = provider_response.model_used
-                if hasattr(routing_decision, "reasoning"):
-                    routing_decision.reasoning += f" (Fallback triggered. Used: {provider_response.model_used})"
+            
+            # Fix: Use 'reason' instead of 'reasoning' to match RoutingDecision definition
+            if hasattr(routing_decision, "reason"):
+                routing_decision.reason += f" (Fallback triggered. Used: {provider_response.model_used})"
+            elif hasattr(routing_decision, "reasoning"):
+                routing_decision.reasoning += f" (Fallback triggered. Used: {provider_response.model_used})"
         # --- BUG FIX END ---
         
         cost_breakdown = cost_calculator.calculate_cost(
